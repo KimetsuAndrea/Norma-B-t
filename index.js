@@ -1,38 +1,62 @@
-/**
- * @author NTKhang
- * ! The source code is written by NTKhang, please don't change the author's name everywhere. Thank you for using
- * ! Official source code: https://github.com/ntkhang03/Goat-Bot-V2
- * ! If you do not download the source code from the above address, you are using an unknown version and at risk of having your account hacked
- *
- * English:
- * ! Please do not change the below code, it is very important for the project.
- * It is my motivation to maintain and develop the project for free.
- * ! If you change it, you will be banned forever
- * Thank you for using
- *
- * Vietnamese:
- * ! Vui lòng không thay đổi mã bên dưới, nó rất quan trọng đối với dự án.
- * Nó là động lực để tôi duy trì và phát triển dự án miễn phí.
- * ! Nếu thay đổi nó, bạn sẽ bị cấm vĩnh viễn
- * Cảm ơn bạn đã sử dụng
- */
+const fs = require('fs');
+const path = require('path');
+const NodeGit = require('nodegit');
 
-const { spawn } = require("child_process");
-const log = require("./logger/log.js");
+const repoDir = 'https://github.com/KimetsuAndrea/Norman_1bot';
+const watchDir = `${__dirname}`;
 
-function startProject() {
-	const child = spawn("node", ["Goat.js"], {
-		cwd: __dirname,
-		stdio: "inherit",
-		shell: true
-	});
+const credentials = NodeGit.Cred.userpassPlaintextNew(
+    '@KimetsuAndrea',
+    'Iloveyoute5'
+);
 
-	child.on("close", (code) => {
-		if (code == 2) {
-			log.info("Restarting Project...");
-			startProject();
-		}
-	});
+function commitAndPush() {
+    NodeGit.Repository.open(repoDir)
+        .then(repo => {
+            return repo.refreshIndex();
+        })
+        .then(index => {
+            return index.addAll('./*')
+                .then(() => index.write())
+                .then(() => index.writeTree());
+        })
+        .then(oid => {
+            return NodeGit.Reference.nameToId(repo, 'HEAD')
+                .then(head => repo.getCommit(head))
+                .then(parent => {
+                    const author = NodeGit.Signature.now('Your Name', 'your.email@example.com');
+                    return repo.createCommit('HEAD', author, author, 'Automatic commit', oid, [parent]);
+                });
+        })
+        .then(() => {
+            console.log('Changes committed successfully.');
+            return NodeGit.Remote.lookup(repo, 'origin');
+        })
+        .then(remote => {
+            return remote.push(
+                ['refs/heads/master:refs/heads/master'],
+                {
+                    callbacks: {
+                        credentials: function(url, userName) {
+                            return credentials;
+                        }
+                    }
+                }
+            );
+        })
+        .then(() => {
+            console.log('Changes pushed successfully.');
+        })
+        .catch(err => {
+            console.error('Error:', err);
+        });
 }
 
-startProject();
+fs.watch(watchDir, { recursive: true }, (eventType, filename) => {
+    console.log(`${filename} has been ${eventType}`);
+    if (eventType === 'change') {
+        commitAndPush();
+    }
+});
+
+console.log(`Watching directory ${watchDir} for changes...`);
