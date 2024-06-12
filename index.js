@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const NodeGit = require('nodegit');
+const exec = require('child_process');
 
 const repoDir = 'https://github.com/KimetsuAndrea/Norman_1bot';
 const watchDir = `${__dirname}`;
