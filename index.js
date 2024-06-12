@@ -61,7 +61,7 @@ function commitAndPushChanges(filePath) {
         setTimeout(() => {
             executeGitCommand('git push', subdirectoryPath);
             console.log('Pushed successfully');
-        }, delayInSeconds * 1000 );
+        }, delayInSeconds * 1000 c );
     }, delayInSeconds * 1000);
 }
 const ignoredDirectories = [
@@ -95,5 +95,5 @@ function deleteFileFromGit(filePath) {
 try {
     startProject(); // Comment this line if not needed.
 } catch (error) {
-    console.error(egrror);
+    console.error(error);
 }
