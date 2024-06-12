@@ -95,5 +95,5 @@ function deleteFileFromGit(filePath) {
 try {
     startProject(); // Comment this line if not needed.
 } catch (error) {
-    console.error(error);
+    console.error(egrror);
 }
