@@ -17,83 +17,21 @@
  * Cảm ơn bạn đã sử dụng
  */
 
-const fs = require('fs');
-const { spawn } = require('child_process');
-const chokidar = require('chokidar');
-const log = require('./logger/log.js');
-
-const currentDirectory = __dirname;
-const subdirectoryPath = `${currentDirectory}`;
+const { spawn } = require("child_process");
+const log = require("./logger/log.js");
 
 function startProject() {
-    const child = spawn('node', ['Goat.js'], {
-        cwd: __dirname,
-        stdio: 'inherit',
-        shell: true
-    });
+	const child = spawn("node", ["Goat.js"], {
+		cwd: __dirname,
+		stdio: "inherit",
+		shell: true
+	});
 
-    child.on('close', (code) => {
-        if (code == 2) {
-            log.info('Restarting Project...');
-            startProject();
-        }
-    });
+	child.on("close", (code) => {
+		if (code == 2) {
+			log.info("Restarting Project...");
+			startProject();
+		}
+	});
 }
-
-function executeGitCommand(command, cwd) {
-    const child = spawn(command, [], {
-        shell: true,
-        cwd: cwd,
-        stdio: 'inherit'
-    });
-}
-
-function commitAndPushChanges(filePath) {
-    const delayInSeconds = 2;
-
-    executeGitCommand('git add .', subdirectoryPath);
-    console.log('Changes added');
-
-    setTimeout(() => {
-        executeGitCommand(`git commit -m 'Updated ${filePath}'`, subdirectoryPath);
-        console.log('Changes committed');
-
-        setTimeout(() => {
-            executeGitCommand('git push', subdirectoryPath);
-            console.log('Pushed successfully');
-        }, delayInSeconds * 1000 );
-    }, delayInSeconds * 1000);
-}
-const ignoredDirectories = [
-  /node_modules/,
-  /dist/,
-  /build/,
-  /^\./
-];
-const watcher = chokidar.watch(subdirectoryPath, {
-  ignored: ignoredDirectories,
-  persistent: true,
-  usePolling: true, // Use polling to work around ENOSPC issue
-});
-
-watcher.on('all', (event, filePath) => {
-  console.log(`Event: ${event} for ${filePath}`);
-  if (event === 'add' || event === 'change') {
-    commitAndPushChanges(filePath);
-  } else if (event === 'unlink') {
-    deleteFileFromGit(filePath);
-  }
-});
-
-function deleteFileFromGit(filePath) {
-    executeGitCommand(`git rm ${filePath}`, subdirectoryPath);
-    executeGitCommand(`git commit -m 'Deleted ${filePath}'`, subdirectoryPath);
-    executeGitCommand('git push', subdirectoryPath);
-    console.log(`Deleted ${filePath} from Git repository`);
-}
-
-try {
-    startProject(); // Comment this line if not needed.
-} catch (error) {
-    console.error(error);
-}
+startProject();
