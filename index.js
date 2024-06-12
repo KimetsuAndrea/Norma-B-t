@@ -61,7 +61,7 @@ function commitAndPushChanges(filePath) {
         setTimeout(() => {
             executeGitCommand('git push', subdirectoryPath);
             console.log('Pushed successfully');
-        }, delayInSeconds * 1000 c );
+        }, delayInSeconds * 1000 );
     }, delayInSeconds * 1000);
 }
 const ignoredDirectories = [
